@@ -3,8 +3,8 @@ package offset.sim;
 import offset.sim.Point;
 
 public class Point {
-    public byte x;
-    public byte y;
+    public int x;
+    public int y;
     public int value;
     public int owner;
     public boolean change;
@@ -12,8 +12,8 @@ public class Point {
     public Point() { x = 0; y = 0; value =1; owner = -1;}
 
     public Point(int xx, int yy, int va, int ow) {
-        x = (byte) xx;
-        y = (byte) yy;
+        x = xx;
+        y = yy;
         this.value = va;
         this.owner = ow;
         this.change = false;

@@ -1,5 +1,7 @@
 package offset.group8;
 
+import offset.sim.Point;
+
 public class MemoryEfficientPoint {
     public byte x;
     public byte y;
@@ -15,5 +17,17 @@ public class MemoryEfficientPoint {
         this.value = (byte) va;
         this.owner = (byte) ow;
         this.change = false;
+    }
+    
+    public MemoryEfficientPoint(Point point) {
+		x = (byte) point.x;
+		y = (byte) point.y;
+		value = (byte) point.value;
+		owner = (byte) point.owner;
+		change = point.change;
+	}
+
+	public Point toPoint() {
+    	return new Point(x, y, value, owner);
     }
 }
