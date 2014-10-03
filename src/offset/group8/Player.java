@@ -8,9 +8,9 @@ import offset.sim.movePair;
 
 public class Player extends offset.sim.Player {
 	static int size = 32;
-	static int MAX_DEPTH = 1;
+	static int MAX_DEPTH = 2;
 	static int opponent_id;
-	static int MAX_MOVES_TO_CHECK = 50;
+	static int MAX_MOVES_TO_CHECK = 10;
 	boolean initiated = false;
 	int expandedNodes = 0;
 	public Player(Pair prin, int idin) {
@@ -51,6 +51,7 @@ public class Player extends offset.sim.Player {
         movePair result = null;
         int resultValue = Integer.MIN_VALUE;
         List<movePair> moves = getAvailableMoves(grid, pr);
+        Collections.shuffle(moves);
         int moveNo = 0;
         for (movePair move : moves) {
         	moveNo++;
@@ -73,6 +74,7 @@ public class Player extends offset.sim.Player {
             return calculateScore(grid, player);
         int value = Integer.MIN_VALUE;
         List<movePair> moves = getAvailableMoves(grid, pr);
+        Collections.shuffle(moves);
         int moveNo = 0;
         for (movePair move : moves) {
         	moveNo++;
@@ -93,6 +95,7 @@ public class Player extends offset.sim.Player {
 			return calculateScore(grid, player);
         int value = Integer.MAX_VALUE;
         List<movePair> moves = getAvailableMoves(grid, pr);
+        Collections.shuffle(moves);
         int moveNo = 0;
         for (movePair move : moves) {
         	moveNo++;
