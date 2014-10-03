@@ -8,8 +8,11 @@ import offset.sim.movePair;
 
 public class Player extends offset.sim.Player {
 	static int size = 32;
-	static int MAX_DEPTH = 2;
+	static int MAX_DEPTH = 1;
 	static int opponent_id;
+	static int MAX_MOVES_TO_CHECK = 50;
+	boolean initiated = false;
+	int expandedNodes = 0;
 	public Player(Pair prin, int idin) {
 		super(prin, idin);
 		// TODO Auto-generated constructor stub
@@ -23,25 +26,24 @@ public class Player extends offset.sim.Player {
 	}
 
 	public movePair move(Point[] grid, Pair pr, Pair pr0, ArrayList<ArrayList> history) {
-		return makeDecision(grid, pr, pr0);
+		if (!initiated) {
+			init();
+		}
+		movePair rtn = makeDecision(grid, pr, pr0);
+		System.out.println(expandedNodes);
+		return rtn;
 	}
 	
-	MemoryEfficientPoint[] cloneAndUpdateGrid(MemoryEfficientPoint[] grid, movePair movepr, int id) {
-		MemoryEfficientPoint[] newGrid = grid.clone();
-		Point target = movepr.target;
-		newGrid[target.x*size+target.y].value = (byte) (newGrid[target.x*size+target.y].value * 2);
-		newGrid[target.x*size+target.y].owner = (byte) id;
-		return newGrid;
-	}
-	
-	MemoryEfficientPoint[] cloneAndUpdateGrid(Point[] grid, movePair movepr, int id) {
-		MemoryEfficientPoint[] newGrid = new MemoryEfficientPoint[grid.length];
+	Point[] cloneAndUpdateGrid(Point[] grid, movePair movepr, int id) {
+		Point[] newGrid = new Point[grid.length];
 		for (int i = 0; i < grid.length; i++) {
-			newGrid[i] = new MemoryEfficientPoint(grid[i]);
+			newGrid[i] = new Point(grid[i]);
 		}
 		Point target = movepr.target;
-		newGrid[target.x*size+target.y].value = (byte) (newGrid[target.x*size+target.y].value * 2);
-		newGrid[target.x*size+target.y].owner = (byte) id;
+		Point src = movepr.src;
+		newGrid[target.x*size+target.y].value = newGrid[target.x*size+target.y].value * 2;
+		newGrid[src.x*size+src.y].value = 0; 
+		newGrid[target.x*size+target.y].owner = id;
 		return newGrid;
 	}
 	
@@ -52,9 +54,9 @@ public class Player extends offset.sim.Player {
         int moveNo = 0;
         for (movePair move : moves) {
         	moveNo++;
-        	if (moveNo > 10)
+        	if (moveNo > MAX_MOVES_TO_CHECK)
         		break;
-        	MemoryEfficientPoint[] newGrid = cloneAndUpdateGrid(grid, move, id);
+        	Point[] newGrid = cloneAndUpdateGrid(grid, move, id);
             int value = minValue(newGrid, id,
                             Integer.MIN_VALUE, Integer.MAX_VALUE, 0);
             if (value > resultValue) {
@@ -65,7 +67,8 @@ public class Player extends offset.sim.Player {
         return result;
 }
 	
-	public int maxValue(MemoryEfficientPoint[] grid, int player, double alpha, double beta, int depth) {
+	public int maxValue(Point[] grid, int player, double alpha, double beta, int depth) {
+		expandedNodes++;
         if (noMove(grid, pr) || depth == MAX_DEPTH)
             return calculateScore(grid, player);
         int value = Integer.MIN_VALUE;
@@ -73,9 +76,9 @@ public class Player extends offset.sim.Player {
         int moveNo = 0;
         for (movePair move : moves) {
         	moveNo++;
-        	if (moveNo > 10)
+        	if (moveNo > MAX_MOVES_TO_CHECK)
         		break;
-        	MemoryEfficientPoint[] newGrid = cloneAndUpdateGrid(grid, move, id);
+        	Point[] newGrid = cloneAndUpdateGrid(grid, move, id);
             value = Math.max(value, minValue(newGrid, player, alpha, beta, depth + 1));
             if (value >= beta)
                     return value;
@@ -84,31 +87,32 @@ public class Player extends offset.sim.Player {
         return value;
 }
 
-	public int minValue(MemoryEfficientPoint[] grid, int player, double alpha, double beta, int depth) {
-			if (noMove(grid, pr) || depth == MAX_DEPTH)
-				return calculateScore(grid, player);
-	        int value = Integer.MAX_VALUE;
-	        List<movePair> moves = getAvailableMoves(grid, pr);
-	        int moveNo = 0;
-	        for (movePair move : moves) {
-	        	moveNo++;
-	        	if (moveNo > 10)
-	        		break;
-	        	MemoryEfficientPoint[] newGrid = cloneAndUpdateGrid(grid, move, opponent_id);
-                value = Math.min(value, maxValue(newGrid, player, alpha, beta, depth + 1));
-                if (value <= alpha)
-                        return value;
-                beta = Math.min(beta, value);
-	        }
-	        return value;
+	public int minValue(Point[] grid, int player, double alpha, double beta, int depth) {
+		expandedNodes++;
+		if (noMove(grid, pr) || depth == MAX_DEPTH)
+			return calculateScore(grid, player);
+        int value = Integer.MAX_VALUE;
+        List<movePair> moves = getAvailableMoves(grid, pr);
+        int moveNo = 0;
+        for (movePair move : moves) {
+        	moveNo++;
+        	if (moveNo > MAX_MOVES_TO_CHECK)
+        		break;
+        	Point[] newGrid = cloneAndUpdateGrid(grid, move, opponent_id);
+            value = Math.min(value, maxValue(newGrid, player, alpha, beta, depth + 1));
+            if (value <= alpha)
+                    return value;
+            beta = Math.min(beta, value);
+        }
+        return value;
 	}
 	
-	 boolean noMove(MemoryEfficientPoint[] grid, Pair pr) {
+	 boolean noMove(Point[] grid, Pair pr) {
 		   for (int i = 0; i < size; i++) {
 				for (int j = 0; j < size; j++) {
 					for (int i_pr=0; i_pr<size; i_pr++) {
 					for (int j_pr=0; j_pr <size; j_pr++) {
-						movePair movepr = new movePair(false, grid[i*size+j].toPoint(), grid[size*i_pr+j_pr].toPoint());
+						movePair movepr = new movePair(false, grid[i*size+j], grid[size*i_pr+j_pr]);
 						if (validateMove(movepr, pr)) {
 							return false;
 						}
@@ -119,7 +123,7 @@ public class Player extends offset.sim.Player {
 		   return true;
 	   }
 	
-	private int calculateScore(MemoryEfficientPoint[] grid, int id) {
+	private int calculateScore(Point[] grid, int id) {
     	int score =0;
     	for (int i=0; i<size; i++) {
     		for (int j =0; j<size; j++) {
@@ -130,27 +134,6 @@ public class Player extends offset.sim.Player {
     	}
     	return score;
     }
-	
-	private static List<movePair> getAvailableMoves(MemoryEfficientPoint[] grid, Pair pr) {
-		List<movePair>rtn = new ArrayList<movePair>();
-		for (int i = 0; i < size; i++) {
-			for (int j = 0; j < size; j++) {
-				for (int i_pr=0; i_pr<size; i_pr++) {
-					for (int j_pr=0; j_pr <size; j_pr++) {
-						movePair movepr = new movePair();
-						movepr.move = false;
-						movepr.src = grid[i*size+j].toPoint();
-						movepr.target = grid[i_pr*size+j_pr].toPoint();
-						if (validateMove(movepr, pr)) {
-							movepr.move = true;
-							rtn.add(movepr);
-						}
-					}
-				}
-			}
-		}
-		return rtn;
-	}
 	
 	private static List<movePair> getAvailableMoves(Point[] grid, Pair pr) {
 		List<movePair>rtn = new ArrayList<movePair>();
