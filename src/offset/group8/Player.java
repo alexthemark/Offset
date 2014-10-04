@@ -11,6 +11,7 @@ public class Player extends offset.sim.Player {
 	static int MAX_DEPTH = 2;
 	static int opponent_id;
 	static int MAX_MOVES_TO_CHECK = 10;
+	Pair opponentPr;
 	boolean initiated = false;
 	int expandedNodes = 0;
 	public Player(Pair prin, int idin) {
@@ -48,6 +49,7 @@ public class Player extends offset.sim.Player {
 	}
 	
 	public movePair makeDecision(Point[] grid, Pair pr, Pair pr0) {
+		opponentPr = pr0;
         movePair result = null;
         int resultValue = Integer.MIN_VALUE;
         List<movePair> moves = getAvailableMoves(grid, pr);
@@ -66,7 +68,7 @@ public class Player extends offset.sim.Player {
             }
         }
         return result;
-}
+	}
 	
 	public int maxValue(Point[] grid, int player, double alpha, double beta, int depth) {
 		expandedNodes++;
@@ -87,14 +89,14 @@ public class Player extends offset.sim.Player {
             alpha = Math.max(alpha, value);
         }
         return value;
-}
+	}
 
 	public int minValue(Point[] grid, int player, double alpha, double beta, int depth) {
 		expandedNodes++;
 		if (noMove(grid, pr) || depth == MAX_DEPTH)
 			return calculateScore(grid, player);
         int value = Integer.MAX_VALUE;
-        List<movePair> moves = getAvailableMoves(grid, pr);
+        List<movePair> moves = getAvailableMoves(grid, opponentPr);
         Collections.shuffle(moves);
         int moveNo = 0;
         for (movePair move : moves) {
@@ -114,12 +116,12 @@ public class Player extends offset.sim.Player {
 		   for (int i = 0; i < size; i++) {
 				for (int j = 0; j < size; j++) {
 					for (int i_pr=0; i_pr<size; i_pr++) {
-					for (int j_pr=0; j_pr <size; j_pr++) {
-						movePair movepr = new movePair(false, grid[i*size+j], grid[size*i_pr+j_pr]);
-						if (validateMove(movepr, pr)) {
-							return false;
+						for (int j_pr=0; j_pr <size; j_pr++) {
+							movePair movepr = new movePair(false, grid[i*size+j], grid[size*i_pr+j_pr]);
+							if (validateMove(movepr, pr)) {
+								return false;
+							}
 						}
-					}
 					}
 				}
 		   }
@@ -159,9 +161,7 @@ public class Player extends offset.sim.Player {
 		return rtn;
 	}
 	
-
 	static boolean validateMove(movePair movepr, Pair pr) {
-    	
     	Point src = movepr.src;
     	Point target = movepr.target;
     	boolean rightposition = false;
