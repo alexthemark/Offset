@@ -1,7 +1,9 @@
 package offset.group8;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import offset.sim.Pair;
 import offset.sim.Point;
@@ -116,6 +118,138 @@ public class GameState {
 		return rtn;
 	}
 	
+	
+	public movePair lowerOpponentMoves(Point [] grid, Pair pr, Pair pr0) {
+		movePair next = new movePair();
+		next.move = false;
+		
+		int leastOpponentMove = Integer.MAX_VALUE;
+		
+		//for (movePair mp : getAvailableMoves(pr, this.playerId)) {
+		for (movePair mp : possibleMoves(grid, pr)) {
+			Point[] newGrid = gridAfterMove(grid, mp, this.playerId);
+			int t=opponentPossibleMoves(newGrid, pr0);
+			if (t < leastOpponentMove){
+				leastOpponentMove = t;
+				next = mp;
+				next.move = true;
+			} 
+		}
+		return next;
+	}
+	
+	
+	public static int opponentPossibleMoves(Point[] grid, Pair pr) {
+		int availableMoves=0;
+		for (int i = 0; i < size; i++) {
+			for (int j = 0; j < size; j++) {
+				Point currentPoint = pointAtIndex(grid, i, j);
+				if (currentPoint.value == 0) {
+					continue;
+				}
+				for (Pair d : moveForPair(pr)) {
+					if (isValidBoardIndex(i + d.p, j + d.q)){
+						Point possiblePairing = pointAtIndex(grid, i + d.p, j + d.q);
+						if (currentPoint.value == possiblePairing.value) {
+							availableMoves+=2;
+						}
+					}
+					
+				}
+			}
+		}
+		
+		return availableMoves;
+	}
+	
+	
+	Point[] gridAfterMove(Point[] grid, movePair move, int newOwner) {
+		Point[] newGrid = new Point[grid.length];
+		for (int i = 0; i < grid.length; i++) {
+			Point newPoint = new Point();
+			newPoint.change = grid[i].change;
+			newPoint.owner = grid[i].owner;
+			newPoint.value = grid[i].value;
+			newPoint.x = grid[i].x;
+			newPoint.y = grid[i].y;
+			newGrid[i] = newPoint;
+		}
+		
+		Point src = move.src;
+		Point target = move.target;
+		
+		assert isValidBoardIndex(src) : "source is not reachable";
+		assert isValidBoardIndex(target) : "destination not reacable";
+		assert src.value == target.value : "different value cells";
+		
+		Point newSrc = pointAtIndex(newGrid, src.x, src.y);
+		Point newTarget = pointAtIndex(newGrid, target.x, target.y);
+		
+		newTarget.value += newSrc.value;
+		newTarget.owner = newOwner;
+		newTarget.change = true;
+		newSrc.value = 0;
+		newSrc.owner = -1;
+		
+		return newGrid;
+	}
+	
+	
+	
+	
+	public static boolean isValidBoardIndex(int i, int j) {
+		if (i < 0 || i >= size || j < 0 || j >= size) {
+			return false;
+		}
+		return true;
+	}
+	
+	public static boolean isValidBoardIndex(Point p) {
+		return isValidBoardIndex(p.x, p.y);
+	}
+	
+	public static Point pointAtIndex(Point[] grid, int i, int j) {
+		return grid[i*size + j];
+	}
+	
+	public static Pair[] moveForPair(Pair pr) {
+		Pair[] moves = new Pair[8];
+		moves[0] = new Pair(pr); 
+		moves[1] = new Pair(pr.p, -pr.q);
+		moves[2] = new Pair(-pr.p, -pr.q);
+		moves[3] = new Pair(-pr.p, -pr.q);
+		moves[4] = new Pair(pr.q, pr.p);
+		moves[5] = new Pair(-pr.q, pr.p);
+		moves[6] = new Pair(pr.q, -pr.p);
+		moves[7] = new Pair(-pr.q, -pr.p);
+		return moves;
+	}
+
+	
+	ArrayList<movePair> possibleMoves(Point[] grid, Pair pr) {
+		ArrayList<movePair> possible = new ArrayList<movePair>();
+		for (int i = 0; i < size; i++) {
+			for (int j = 0; j < size; j++) {
+				Point currentPoint = pointAtIndex(grid, i, j);
+				if (currentPoint.value == 0) {
+					continue;
+				}
+				for (Pair d : moveForPair(pr)) {
+					if (isValidBoardIndex(i + d.p, j + d.q)){
+						Point possiblePairing = pointAtIndex(grid, i + d.p, j + d.q);
+						if (currentPoint.value == possiblePairing.value) {
+							possible.add(new movePair(true, currentPoint, possiblePairing));
+							possible.add(new movePair(true, possiblePairing, currentPoint));
+						}
+					}
+					
+				}
+			}
+		}
+		
+		return possible;
+	}
+	
 	static boolean validateMove(movePair movepr, Pair pr) {
     	Point src = movepr.src;
     	Point target = movepr.target;
@@ -130,4 +264,9 @@ public class GameState {
         	return false;
         }
     }
+	
+	
+	
+	
+	
 }

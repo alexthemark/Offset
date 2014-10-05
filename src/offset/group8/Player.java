@@ -31,7 +31,19 @@ public class Player extends offset.sim.Player {
 			init();
 		}
 		GameState startState = new GameState(grid, pr, pr0, id, opponent_id);
-		movePair rtn = makeDecision(startState, pr, pr0);
+		movePair rtn=null;
+		
+		// when it reaches 125 ticks, each tick adds two input to the history
+		if(history.size()<250){
+			rtn=startState.lowerOpponentMoves(grid, pr, pr0);
+		}else{
+			rtn = makeDecision(startState, pr, pr0);
+		}
+		
+		//sometimes makeDecision returns null, it has a bug that's why this added
+		if(rtn==null){
+			rtn=startState.lowerOpponentMoves(grid, pr, pr0);
+		}
 		System.out.println(expandedNodes);
 		return rtn;
 	}

@@ -552,7 +552,7 @@ public class Offset
         	currentPr = p1;
         	currentplayer =1;
         }
-        //System.out.println(next.move);
+        
         if (next.move) {
         if (validateMove(next, currentPr)) {
         	writer.printf("(%d, %b, (%d, %d), (%d, %d), %d)\n", currentplayer, next.move, next.src.x, next.src.y, next.target.x, next.target.y, next.src.value*2);
