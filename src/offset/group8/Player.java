@@ -35,14 +35,14 @@ public class Player extends offset.sim.Player {
 		
 		// when it reaches 125 ticks, each tick adds two input to the history
 		if(history.size()<250){
-			rtn=startState.lowerOpponentMoves(grid, pr, pr0);
+			rtn=startState.lowerOpponentMoves(pr, pr0);
 		}else{
 			rtn = makeDecision(startState, pr, pr0);
 		}
 		
 		//sometimes makeDecision returns null, it has a bug that's why this added
 		if(rtn==null){
-			rtn=startState.lowerOpponentMoves(grid, pr, pr0);
+			rtn=startState.lowerOpponentMoves(pr, pr0);
 		}
 		System.out.println(expandedNodes);
 		return rtn;
@@ -52,7 +52,7 @@ public class Player extends offset.sim.Player {
 		opponentPr = pr0;
         movePair result = null;
         int resultValue = Integer.MIN_VALUE;
-        List<movePair> moves = startState.getAvailableMoves(pr, id);
+        List<movePair> moves = startState.getAvailableMoves(id);
         int moveNo = 0;
         for (movePair move : moves) {
         	moveNo++;
@@ -74,7 +74,7 @@ public class Player extends offset.sim.Player {
         if (depth == MAX_DEPTH)
             return startState.playerScore;
         int value = Integer.MIN_VALUE;
-        List<movePair> moves = startState.getAvailableMoves(pr, id);
+        List<movePair> moves = startState.getAvailableMoves(id);
         if (moves.isEmpty())
         	return startState.playerScore;
         int moveNo = 0;
@@ -97,7 +97,7 @@ public class Player extends offset.sim.Player {
 		if (depth == MAX_DEPTH)
 			return startState.opponentScore;
         int value = Integer.MAX_VALUE;
-        List<movePair> moves = startState.getAvailableMoves(pr, id);
+        List<movePair> moves = startState.getAvailableMoves(id);
         if (moves.isEmpty())
         	return startState.opponentScore;
         int moveNo = 0;

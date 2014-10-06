@@ -18,8 +18,10 @@ public class GameState {
 	public int opponentId;
 	public int playerScore;
 	public int opponentScore;
+	private MovePackage playerMoves;
+	private MovePackage opponentMoves;
 	
-	static int size = 32;
+	public static int size = 32;
 	
 	public GameState (Point[] oneDGrid, Pair playerPair, Pair opponentPair, int playerId, int opponentId) {
 		grid = new Point[size][size];
@@ -32,6 +34,8 @@ public class GameState {
 		this.opponentId = opponentId;
 		this.playerScore = calculateScore(playerId);
 		this.opponentScore = calculateScore(opponentId);
+		playerMoves = new MovePackage(playerId, opponentId, playerPair, grid);
+		opponentMoves = new MovePackage(opponentId, playerId, opponentPair, grid);
 	}
 	
 	public GameState(GameState oldGame) {
@@ -43,6 +47,8 @@ public class GameState {
 		}
 		this.playerPair = oldGame.playerPair;
 		this.opponentPair = oldGame.opponentPair;
+		this.playerMoves = oldGame.playerMoves;
+		this.opponentMoves = oldGame.opponentMoves;
 	}
 	
 	public void makeMove(movePair movepr, int playerId) {
@@ -74,6 +80,32 @@ public class GameState {
     	return score;
     }
 	
+	public List<movePair> getAvailableMoves(int id) {
+		if (id == playerId)
+			return playerMoves.getPossibleMovesByPriority();
+		else
+			return opponentMoves.getPossibleMovesByPriority();
+	}
+	
+	public movePair lowerOpponentMoves(Pair pr, Pair pr0) {
+		movePair next = new movePair();
+		next.move = false;
+		
+		int leastOpponentMove = Integer.MAX_VALUE;
+		
+		for (movePair mp : possibleMoves(grid, pr)) {
+			Point[] newGrid = gridAfterMove(grid, mp, this.playerId);
+			int t=opponentPossibleMoves(newGrid, pr0);
+			if (t < leastOpponentMove){
+				leastOpponentMove = t;
+				next = mp;
+				next.move = true;
+			} 
+		}
+		return next;
+	}
+	
+	/*
 	public List<movePair> getAvailableMoves(Pair pr, int playerId) {
 		int opponentId = 0;
 		if (playerId == 0)
@@ -194,37 +226,9 @@ public class GameState {
 		return newGrid;
 	}
 	
-	
-	
-	
-	public static boolean isValidBoardIndex(int i, int j) {
-		if (i < 0 || i >= size || j < 0 || j >= size) {
-			return false;
-		}
-		return true;
-	}
-	
-	public static boolean isValidBoardIndex(Point p) {
-		return isValidBoardIndex(p.x, p.y);
-	}
-	
 	public static Point pointAtIndex(Point[] grid, int i, int j) {
 		return grid[i*size + j];
 	}
-	
-	public static Pair[] moveForPair(Pair pr) {
-		Pair[] moves = new Pair[8];
-		moves[0] = new Pair(pr); 
-		moves[1] = new Pair(pr.p, -pr.q);
-		moves[2] = new Pair(-pr.p, -pr.q);
-		moves[3] = new Pair(-pr.p, -pr.q);
-		moves[4] = new Pair(pr.q, pr.p);
-		moves[5] = new Pair(-pr.q, pr.p);
-		moves[6] = new Pair(pr.q, -pr.p);
-		moves[7] = new Pair(-pr.q, -pr.p);
-		return moves;
-	}
-
 	
 	ArrayList<movePair> possibleMoves(Point[] grid, Pair pr) {
 		ArrayList<movePair> possible = new ArrayList<movePair>();
@@ -242,31 +246,11 @@ public class GameState {
 							possible.add(new movePair(true, possiblePairing, currentPoint));
 						}
 					}
-					
 				}
 			}
 		}
+		*/
 		
 		return possible;
 	}
-	
-	static boolean validateMove(movePair movepr, Pair pr) {
-    	Point src = movepr.src;
-    	Point target = movepr.target;
-    	boolean rightposition = false;
-    	if (Math.abs(target.x-src.x)==Math.abs(pr.p) && Math.abs(target.y-src.y)==Math.abs(pr.q)) {
-    		rightposition = true;
-    	}
-        if (rightposition  && src.value == target.value && src.value >0) {
-        	return true;
-        }
-        else {
-        	return false;
-        }
-    }
-	
-	
-	
-	
-	
 }
