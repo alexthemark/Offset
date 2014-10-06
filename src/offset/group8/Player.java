@@ -8,7 +8,7 @@ import offset.sim.movePair;
 
 public class Player extends offset.sim.Player {
 	static int size = 32;
-	static int MAX_DEPTH = 2;
+	static int MAX_DEPTH = 3;
 	static int opponent_id;
 	static int MAX_MOVES_TO_CHECK = 10;
 	Pair opponentPr;
@@ -31,7 +31,7 @@ public class Player extends offset.sim.Player {
 			init();
 		}
 		GameState startState = new GameState(grid, pr, pr0, id, opponent_id);
-		movePair rtn=null;
+		/*movePair rtn=null;
 		
 		// when it reaches 125 ticks, each tick adds two input to the history
 		if(history.size()<250){
@@ -44,6 +44,9 @@ public class Player extends offset.sim.Player {
 		if(rtn==null){
 			rtn=startState.lowerOpponentMoves(pr, pr0);
 		}
+		System.out.println(expandedNodes);
+		*/
+		movePair rtn = makeDecision(startState, pr, pr0);
 		System.out.println(expandedNodes);
 		return rtn;
 	}

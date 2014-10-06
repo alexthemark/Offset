@@ -66,6 +66,8 @@ public class GameState {
 		grid[src.x][src.y].value = 0; 
 		grid[target.x][target.y].owner = playerId;
 		grid[src.x][src.y].owner = -1;
+		playerMoves.registerChange(movepr);
+		opponentMoves.registerChange(movepr);
 	}
 	
 	private int calculateScore(int id) {
@@ -82,11 +84,15 @@ public class GameState {
 	
 	public List<movePair> getAvailableMoves(int id) {
 		if (id == playerId)
-			return playerMoves.getPossibleMovesByPriority();
+			return playerMoves.getPossibleMovesByPriority(Player.MAX_MOVES_TO_CHECK);
 		else
-			return opponentMoves.getPossibleMovesByPriority();
+			return opponentMoves.getPossibleMovesByPriority(Player.MAX_MOVES_TO_CHECK);
 	}
 	
+	
+	/*
+	 * Below this line should be updated to reflect OO design
+	 * 
 	public movePair lowerOpponentMoves(Pair pr, Pair pr0) {
 		movePair next = new movePair();
 		next.move = false;
@@ -105,7 +111,7 @@ public class GameState {
 		return next;
 	}
 	
-	/*
+	
 	public List<movePair> getAvailableMoves(Pair pr, int playerId) {
 		int opponentId = 0;
 		if (playerId == 0)
@@ -249,8 +255,9 @@ public class GameState {
 				}
 			}
 		}
-		*/
+		
 		
 		return possible;
 	}
+	*/
 }
