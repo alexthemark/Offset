@@ -3,6 +3,7 @@ package offset.group8;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -77,15 +78,21 @@ public class MovePackage implements Cloneable{
 		Point[] changedPoints = new Point[2];
 		changedPoints[0] = oldMove.src;
 		changedPoints[1] = oldMove.target;
-		for (Set<movePair> moveList : moves) {
+		for (Set<movePair> moveSet : moves) {
 			for (Point point : changedPoints) {
+				for (Iterator<movePair> i = moveSet.iterator(); i.hasNext();) {
+					movePair move = i.next();
+					if (move.src.equals(point) || move.target.equals(point)) {
+						i.remove();
+					}
+				}
 				int i = point.x;
 				int j = point.y;
 				Point currentPoint = grid[i][j];
 				for (Pair d : moveForPair(myPair)) {
 					if (isValidBoardIndex(i + d.p, j + d.q)){
 						Point possiblePairing = grid[i+d.p][j+d.q];
-						if (currentPoint.value == possiblePairing.value) {
+						if (currentPoint.value == possiblePairing.value && currentPoint.value > 0) {
 							movePair movepr = new movePair();
 							movepr.src = grid[i][j];
 							movepr.target = grid[i+d.p][j+d.q];
