@@ -565,6 +565,7 @@ public class Offset
         	//pairPrint(next);
         }
         else {
+        	System.out.println("Move from (" + next.src.x + "," + next.src.y + ") to (" + next.target.x + "," + next.target.y + ")");
         	System.out.println("[ERROR] Invalid move, let the player stay.");
         }
         }

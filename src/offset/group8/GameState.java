@@ -47,8 +47,8 @@ public class GameState {
 		}
 		this.playerPair = oldGame.playerPair;
 		this.opponentPair = oldGame.opponentPair;
-		this.playerMoves = oldGame.playerMoves;
-		this.opponentMoves = oldGame.opponentMoves;
+		this.playerMoves = oldGame.playerMoves.clone();
+		this.opponentMoves = oldGame.opponentMoves.clone();
 	}
 	
 	public void makeMove(movePair movepr, int playerId) {

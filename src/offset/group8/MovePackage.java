@@ -9,7 +9,7 @@ import offset.sim.Pair;
 import offset.sim.Point;
 import offset.sim.movePair;
 
-public class MovePackage {
+public class MovePackage implements Cloneable{
 	private int myId;
 	private int opponentId;
 	private Point[][] grid;
@@ -41,6 +41,16 @@ public class MovePackage {
 		rtn.addAll(singleOpponentMoves.values());
 		rtn.addAll(doubleMyMoves.values());
 		rtn.addAll(unclaimedMoves.values());
+		return rtn;
+	}
+	
+	public MovePackage clone() {
+		MovePackage rtn = new MovePackage(myId, opponentId, myPair, grid);
+		rtn.doubleMyMoves = new HashMap<Point, movePair>(doubleMyMoves);
+		rtn.unclaimedMoves = new HashMap<Point, movePair>(unclaimedMoves);
+		rtn.doubleOpponentMoves = new HashMap<Point, movePair>(doubleOpponentMoves);
+		rtn.singleOpponentMoves = new HashMap<Point, movePair>(singleOpponentMoves);
+		rtn.initi = true;
 		return rtn;
 	}
 	
