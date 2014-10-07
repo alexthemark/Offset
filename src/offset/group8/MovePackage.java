@@ -15,7 +15,7 @@ import offset.sim.movePair;
 public class MovePackage implements Cloneable{
 	private int myId;
 	private int opponentId;
-	private Point[][] grid;
+	public Point[][] grid;
 	Set<movePair> doubleOpponentMoves;
 	Set<movePair> singleOpponentMoves;
 	Set<movePair> doubleMyMoves;

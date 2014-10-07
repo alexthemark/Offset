@@ -69,6 +69,8 @@ public class Player extends offset.sim.Player {
                     resultValue = value;
             }
         }
+        movePair next = result;
+    	System.out.println("Move from (" + next.src.x + "," + next.src.y + ") to (" + next.target.x + "," + next.target.y + ")" + "to double " + next.target.value);
         return result;
 	}
 	
