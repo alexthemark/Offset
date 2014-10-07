@@ -2,8 +2,10 @@ package offset.group8;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import offset.sim.Pair;
 import offset.sim.Point;
@@ -13,23 +15,33 @@ public class MovePackage implements Cloneable{
 	private int myId;
 	private int opponentId;
 	private Point[][] grid;
-	Map<Point, movePair> doubleOpponentMoves;
-	Map<Point, movePair> singleOpponentMoves;
-	Map<Point, movePair> doubleMyMoves;
-	Map<Point, movePair> unclaimedMoves;
+	Set<movePair> doubleOpponentMoves;
+	Set<movePair> singleOpponentMoves;
+	Set<movePair> doubleMyMoves;
+	Set<movePair> unclaimedMoves;
 	Pair myPair;
 	boolean initi;
 	
 	public MovePackage(int myId, int opponentId, Pair myPair, Point[][] grid) {
 		this.myId = myId;
 		this.opponentId = opponentId;
-		doubleOpponentMoves = new HashMap<Point, movePair>();
-		singleOpponentMoves = new HashMap<Point, movePair>();
-		doubleMyMoves = new HashMap<Point, movePair>();
-		unclaimedMoves = new HashMap<Point, movePair>();
+		doubleOpponentMoves = new HashSet<movePair>();
+		singleOpponentMoves = new HashSet<movePair>();
+		doubleMyMoves = new HashSet<movePair>();
+		unclaimedMoves = new HashSet<movePair>();
 		this.myPair = myPair;
 		this.grid = grid;
 		initi = false;
+	}
+	
+	public MovePackage clone() {
+		MovePackage rtn = new MovePackage(myId, opponentId, myPair, grid);
+		rtn.doubleOpponentMoves = new HashSet<movePair>(doubleOpponentMoves);
+		rtn.singleOpponentMoves = new HashSet<movePair>(singleOpponentMoves);
+		rtn.unclaimedMoves = new HashSet<movePair>(unclaimedMoves);
+		rtn.doubleMyMoves = new HashSet<movePair>(doubleMyMoves);
+		rtn.initi = true;
+		return rtn;
 	}
 	
 	public List<movePair> getPossibleMovesByPriority(int numberToReturn) {
@@ -37,20 +49,18 @@ public class MovePackage implements Cloneable{
 		if (!initi) {
 			initializeMoves();
 		}
-		rtn.addAll(doubleOpponentMoves.values());
-		rtn.addAll(singleOpponentMoves.values());
-		rtn.addAll(doubleMyMoves.values());
-		rtn.addAll(unclaimedMoves.values());
-		return rtn;
-	}
-	
-	public MovePackage clone() {
-		MovePackage rtn = new MovePackage(myId, opponentId, myPair, grid);
-		rtn.doubleMyMoves = new HashMap<Point, movePair>(doubleMyMoves);
-		rtn.unclaimedMoves = new HashMap<Point, movePair>(unclaimedMoves);
-		rtn.doubleOpponentMoves = new HashMap<Point, movePair>(doubleOpponentMoves);
-		rtn.singleOpponentMoves = new HashMap<Point, movePair>(singleOpponentMoves);
-		rtn.initi = true;
+		rtn.addAll(doubleOpponentMoves);
+		if (rtn.size() >= numberToReturn)
+			return rtn;
+		rtn.addAll(singleOpponentMoves);
+		if (rtn.size() >= numberToReturn)
+			return rtn;
+		rtn.addAll(doubleMyMoves);
+		if (rtn.size() >= numberToReturn)
+			return rtn;
+		rtn.addAll(unclaimedMoves);
+		if (rtn.size() >= numberToReturn)
+			return rtn;
 		return rtn;
 	}
 	
@@ -59,7 +69,7 @@ public class MovePackage implements Cloneable{
 	}
 	
 	public void registerChange(movePair oldMove) {
-		ArrayList<Map<Point, movePair>> moves = new ArrayList<Map<Point, movePair>>();
+		ArrayList<Set<movePair>> moves = new ArrayList<Set<movePair>>();
 		moves.add(doubleOpponentMoves);
 		moves.add(singleOpponentMoves);
 		moves.add(doubleMyMoves);
@@ -67,37 +77,30 @@ public class MovePackage implements Cloneable{
 		Point[] changedPoints = new Point[2];
 		changedPoints[0] = oldMove.src;
 		changedPoints[1] = oldMove.target;
-		for (Map<Point, movePair> moveMap : moves) {
+		for (Set<movePair> moveList : moves) {
 			for (Point point : changedPoints) {
-				if (moveMap.containsKey(point)) {
-					moveMap.remove(point);
-					int i = point.x;
-					int j = point.y;
-					Point currentPoint = grid[i][j];
-					for (Pair d : moveForPair(myPair)) {
-						if (isValidBoardIndex(i + d.p, j + d.q)){
-							Point possiblePairing = grid[i+d.p][j+d.q];
-							if (currentPoint.value == possiblePairing.value) {
-								movePair movepr = new movePair();
-								movepr.src = grid[i][j];
-								movepr.target = grid[i+d.p][j+d.q];
-								movepr.move = true;						
-								if(movepr.src.owner == opponentId && movepr.target.owner == opponentId) {
-									doubleOpponentMoves.put(currentPoint, movepr);
-									doubleOpponentMoves.put(possiblePairing, movepr);
-								}
-								else if(movepr.src.owner != movepr.target.owner && movepr.src.value !=1) {
-									singleOpponentMoves.put(currentPoint, movepr);
-									singleOpponentMoves.put(possiblePairing, movepr);
-								}
-								else if(movepr.src.owner != movepr.target.owner) {
-									doubleMyMoves.put(currentPoint, movepr);
-									doubleMyMoves.put(possiblePairing, movepr);
-								}
-								else {
-									unclaimedMoves.put(currentPoint, movepr);
-									unclaimedMoves.put(possiblePairing, movepr);
-								}
+				int i = point.x;
+				int j = point.y;
+				Point currentPoint = grid[i][j];
+				for (Pair d : moveForPair(myPair)) {
+					if (isValidBoardIndex(i + d.p, j + d.q)){
+						Point possiblePairing = grid[i+d.p][j+d.q];
+						if (currentPoint.value == possiblePairing.value) {
+							movePair movepr = new movePair();
+							movepr.src = grid[i][j];
+							movepr.target = grid[i+d.p][j+d.q];
+							movepr.move = true;						
+							if(movepr.src.owner == opponentId && movepr.target.owner == opponentId) {
+								doubleOpponentMoves.add(movepr);
+							}
+							else if(movepr.src.owner != movepr.target.owner && movepr.src.value !=1) {
+								singleOpponentMoves.add(movepr);
+							}
+							else if(movepr.src.owner != movepr.target.owner) {
+								doubleMyMoves.add(movepr);
+							}
+							else {
+								unclaimedMoves.add(movepr);
 							}
 						}
 					}
@@ -119,20 +122,16 @@ public class MovePackage implements Cloneable{
 							movepr.target = grid[i+d.p][j+d.q];
 							movepr.move = true;						
 							if(movepr.src.owner == opponentId && movepr.target.owner == opponentId) {
-								doubleOpponentMoves.put(currentPoint, movepr);
-								doubleOpponentMoves.put(possiblePairing, movepr);
+								doubleOpponentMoves.add(movepr);
 							}
 							else if(movepr.src.owner != movepr.target.owner && movepr.src.value !=1) {
-								singleOpponentMoves.put(currentPoint, movepr);
-								singleOpponentMoves.put(possiblePairing, movepr);
+								singleOpponentMoves.add(movepr);
 							}
 							else if(movepr.src.owner != movepr.target.owner) {
-								doubleMyMoves.put(currentPoint, movepr);
-								doubleMyMoves.put(possiblePairing, movepr);
+								doubleMyMoves.add(movepr);
 							}
 							else {
-								unclaimedMoves.put(currentPoint, movepr);
-								unclaimedMoves.put(possiblePairing, movepr);
+								unclaimedMoves.add(movepr);
 							}
 						}
 					}
