@@ -30,7 +30,11 @@ public class Player extends offset.sim.Player {
 		if (!initiated) {
 			init();
 		}
-		GameState startState = new GameState(grid, pr, pr0, id, opponent_id);
+		movePair lastMove = null;
+		if (history.size() > 0) {
+			lastMove = (movePair) history.get(history.size() - 1).get(1);
+		}
+		GameState startState = new GameState(grid, pr, pr0, id, opponent_id, lastMove);
 		/*movePair rtn=null;
 		
 		// when it reaches 125 ticks, each tick adds two input to the history
@@ -78,7 +82,7 @@ public class Player extends offset.sim.Player {
 	public int maxValue(GameState startState, double alpha, double beta, int depth) {
 		expandedNodes++;
         if (depth == MAX_DEPTH)
-            return startState.playerScore;
+            return startState.playerMoves.getNumberOfRemainingMoves();;
         int value = Integer.MIN_VALUE;
         List<movePair> moves = startState.getAvailableMoves(id);
         if (moves.isEmpty())
@@ -101,7 +105,7 @@ public class Player extends offset.sim.Player {
 	public int minValue(GameState startState, double alpha, double beta, int depth) {
 		expandedNodes++;
 		if (depth == MAX_DEPTH)
-			return startState.opponentScore;
+			return startState.opponentMoves.getNumberOfRemainingMoves();
         int value = Integer.MAX_VALUE;
         List<movePair> moves = startState.getAvailableMoves(id);
         if (moves.isEmpty())

@@ -18,13 +18,13 @@ public class GameState {
 	public int opponentId;
 	public int playerScore;
 	public int opponentScore;
-	private MovePackage playerMoves;
-	private MovePackage opponentMoves;
+	public MovePackage playerMoves;
+	public MovePackage opponentMoves;
 	private Point lastPoint;
 	
 	public static int size = 32;
 	
-	public GameState (Point[] oneDGrid, Pair playerPair, Pair opponentPair, int playerId, int opponentId) {
+	public GameState (Point[] oneDGrid, Pair playerPair, Pair opponentPair, int playerId, int opponentId, movePair lastMove) {
 		grid = new Point[size][size];
 		for (Point point : oneDGrid) {
 			grid[point.x][point.y] = point;
@@ -37,6 +37,8 @@ public class GameState {
 		this.opponentScore = calculateScore(opponentId);
 		playerMoves = new MovePackage(playerId, opponentId, playerPair, grid);
 		opponentMoves = new MovePackage(opponentId, playerId, opponentPair, grid);
+		if (lastMove != null)
+			lastPoint = lastMove.target;
 	}
 	
 	public GameState(GameState oldGame) {

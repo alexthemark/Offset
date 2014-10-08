@@ -1,11 +1,9 @@
 package offset.group8;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import offset.sim.Pair;
@@ -50,10 +48,34 @@ public class MovePackage implements Cloneable{
 		if (!initi) {
 			initializeMoves();
 		}
+		ArrayList<movePair> movesNearOpponent = new ArrayList<movePair>();
 		//lastTarget is passed in null if we're at the start of a game
-		if (lastTarget != null) {
-			
+		if (lastTarget != null && lastTarget.owner == opponentId) {
+			int movesToAdd = 0;
+			int i = lastTarget.x;
+			int j = lastTarget.y;
+			for (Pair d : moveForPair(myPair)) {
+				if (isValidBoardIndex(i + d.p, j + d.q)) {
+					Point possiblePairing = grid[i+d.p][j+d.q];
+					for (Pair d2 : moveForPair(myPair)) {
+						if (isValidBoardIndex(i+d.p+d2.p, j +d.q+d2.q)){
+							Point possiblePairingPairing = grid[i+d.p+d2.p][j+d.q+d2.q];
+							if (possiblePairingPairing.value == possiblePairing.value) {
+								movePair movepr = new movePair();
+								movepr.src = grid[i+d.p][j+d.q];
+								movepr.target = grid[i+d.p+d2.p][j+d.q+d2.q];
+								movepr.move = true;
+								movesNearOpponent.add(movepr);
+								movesToAdd++;
+								if (movesToAdd > 3)
+									break;
+							}
+						}
+					}
+				}
+			}
 		}
+		rtn.addAll(movesNearOpponent);
 		rtn.addAll(doubleOpponentMoves);
 		if (rtn.size() >= numberToReturn)
 			return rtn;
