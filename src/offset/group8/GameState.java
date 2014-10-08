@@ -20,6 +20,7 @@ public class GameState {
 	public int opponentScore;
 	private MovePackage playerMoves;
 	private MovePackage opponentMoves;
+	private Point lastPoint;
 	
 	public static int size = 32;
 	
@@ -51,6 +52,7 @@ public class GameState {
 		this.opponentMoves = oldGame.opponentMoves.clone();
 		playerMoves.grid = grid;
 		opponentMoves.grid = grid;
+		lastPoint = null;
 	}
 	
 	public void makeMove(movePair movepr, int playerId) {
@@ -70,6 +72,7 @@ public class GameState {
 		grid[src.x][src.y].owner = -1;
 		playerMoves.registerChange(movepr);
 		opponentMoves.registerChange(movepr);
+		lastPoint = movepr.target;
 	}
 	
 	private int calculateScore(int id) {
@@ -86,9 +89,9 @@ public class GameState {
 	
 	public List<movePair> getAvailableMoves(int id) {
 		if (id == playerId)
-			return playerMoves.getPossibleMovesByPriority(Player.MAX_MOVES_TO_CHECK);
+			return playerMoves.getPossibleMovesByPriority(Player.MAX_MOVES_TO_CHECK, lastPoint);
 		else
-			return opponentMoves.getPossibleMovesByPriority(Player.MAX_MOVES_TO_CHECK);
+			return opponentMoves.getPossibleMovesByPriority(Player.MAX_MOVES_TO_CHECK, lastPoint);
 	}
 	
 	

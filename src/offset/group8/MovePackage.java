@@ -45,10 +45,14 @@ public class MovePackage implements Cloneable{
 		return rtn;
 	}
 	
-	public List<movePair> getPossibleMovesByPriority(int numberToReturn) {
+	public List<movePair> getPossibleMovesByPriority(int numberToReturn, Point lastTarget) {
 		List<movePair> rtn = new ArrayList<movePair>();
 		if (!initi) {
 			initializeMoves();
+		}
+		//lastTarget is passed in null if we're at the start of a game
+		if (lastTarget != null) {
+			
 		}
 		rtn.addAll(doubleOpponentMoves);
 		if (rtn.size() >= numberToReturn)
@@ -92,7 +96,7 @@ public class MovePackage implements Cloneable{
 				for (Pair d : moveForPair(myPair)) {
 					if (isValidBoardIndex(i + d.p, j + d.q)){
 						Point possiblePairing = grid[i+d.p][j+d.q];
-						if (currentPoint.value == possiblePairing.value && currentPoint.value > 0) {
+						if (currentPoint.value == possiblePairing.value && currentPoint.value != 0) {
 							movePair movepr = new movePair();
 							movepr.src = grid[i][j];
 							movepr.target = grid[i+d.p][j+d.q];
@@ -123,7 +127,7 @@ public class MovePackage implements Cloneable{
 				for (Pair d : moveForPair(myPair)) {
 					if (isValidBoardIndex(i + d.p, j + d.q)){
 						Point possiblePairing = grid[i+d.p][j+d.q];
-						if (currentPoint.value == possiblePairing.value) {
+						if (currentPoint.value == possiblePairing.value && currentPoint.value != 0) {
 							movePair movepr = new movePair();
 							movepr.src = grid[i][j];
 							movepr.target = grid[i+d.p][j+d.q];

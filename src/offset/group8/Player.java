@@ -10,7 +10,7 @@ public class Player extends offset.sim.Player {
 	static int size = 32;
 	static int MAX_DEPTH = 3;
 	static int opponent_id;
-	static int MAX_MOVES_TO_CHECK = 5;
+	static int MAX_MOVES_TO_CHECK = 10;
 	Pair opponentPr;
 	boolean initiated = false;
 	int expandedNodes = 0;
@@ -69,8 +69,9 @@ public class Player extends offset.sim.Player {
                     resultValue = value;
             }
         }
-        movePair next = result;
-    	System.out.println("Move from (" + next.src.x + "," + next.src.y + ") to (" + next.target.x + "," + next.target.y + ")" + "to double " + next.target.value);
+        if (result == null) {
+        	result = new movePair(false, new Point(0,0,0,0), new Point(0,0,0,0));
+        }
         return result;
 	}
 	
