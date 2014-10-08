@@ -60,7 +60,7 @@ public class MovePackage implements Cloneable{
 					for (Pair d2 : moveForPair(myPair)) {
 						if (isValidBoardIndex(i+d.p+d2.p, j +d.q+d2.q)){
 							Point possiblePairingPairing = grid[i+d.p+d2.p][j+d.q+d2.q];
-							if (possiblePairingPairing.value == possiblePairing.value) {
+							if (possiblePairingPairing.value == possiblePairing.value && possiblePairing.value > 0) {
 								movePair movepr = new movePair();
 								movepr.src = grid[i+d.p][j+d.q];
 								movepr.target = grid[i+d.p+d2.p][j+d.q+d2.q];
@@ -72,6 +72,8 @@ public class MovePackage implements Cloneable{
 							}
 						}
 					}
+					if (movesToAdd > 3)
+						break;
 				}
 			}
 		}

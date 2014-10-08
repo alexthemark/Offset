@@ -8,7 +8,7 @@ import offset.sim.movePair;
 
 public class Player extends offset.sim.Player {
 	static int size = 32;
-	static int MAX_DEPTH = 3;
+	static int MAX_DEPTH = 1;
 	static int opponent_id;
 	static int MAX_MOVES_TO_CHECK = 10;
 	Pair opponentPr;
