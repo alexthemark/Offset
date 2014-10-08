@@ -26,6 +26,15 @@ public class Player extends offset.sim.Player {
 			opponent_id = 1;
 	}
 
+	
+	public static Point[][] get2DGrid(Point[]grid){
+		Point [][]grid2D = new Point[size][size];
+		for (Point point : grid) {
+			grid2D[point.x][point.y] = point;
+		}
+		return grid2D;
+	}
+	
 	public movePair move(Point[] grid, Pair pr, Pair pr0, ArrayList<ArrayList> history) {
 		if (!initiated) {
 			init();
@@ -50,7 +59,20 @@ public class Player extends offset.sim.Player {
 		}
 		System.out.println(expandedNodes);
 		*/
-		movePair rtn = makeDecision(startState, pr, pr0);
+		
+		
+		movePair rtn=null;
+		rtn=startState.lowerOpponentMoves(pr, pr0);
+		
+		if(rtn==null){
+			rtn=makeDecision(startState, pr, pr0);
+		}
+		
+		if(rtn==null){
+			rtn=GameState.getAnyMove(get2DGrid(grid), pr);
+		}
+		
+		
 		System.out.println(expandedNodes);
 		return rtn;
 	}
