@@ -2,6 +2,7 @@ package offset.group8;
 
 import java.util.*;
 
+import offset.group8.GameState;
 import offset.sim.Pair;
 import offset.sim.Point;
 import offset.sim.movePair;
@@ -64,8 +65,9 @@ public class Player extends offset.sim.Player {
 		movePair rtn=null;
 		rtn=startState.lowerOpponentMoves(pr, pr0);
 		
-		if(rtn==null){
+		if(GameState.opponentPossibleMoves(get2DGrid(grid), pr0)<10){
 			rtn=makeDecision(startState, pr, pr0);
+			return rtn;
 		}
 		
 		if(rtn==null){

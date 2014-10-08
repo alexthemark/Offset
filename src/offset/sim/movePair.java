@@ -1,6 +1,6 @@
 package offset.sim;
 
-import offset.sim.movePair;
+import offset.sim.Offset;
 
 public class movePair {
 
