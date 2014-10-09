@@ -106,7 +106,7 @@ public class GameState {
 		if(!possibleMoves(grid, pr).isEmpty()){
 		 next= possibleMoves(grid, pr).get(0);
 		}else{
-			next=getAnyMove(grid, pr);
+			next=getAnyMove(grid, pr, playerId);
 		}
 		next.move = false;
 		
@@ -190,8 +190,7 @@ public class GameState {
 		return next;
 	}
 	
-	
-	
+		
 	public List<movePair> getAvailableMoves(Pair pr, int playerId) {
 		int opponentId = 0;
 		if (playerId == 0)
@@ -276,14 +275,10 @@ public class GameState {
 					
 				}
 			}
-		}
-		
+		}		
 		return availableMoves;
 	}
 	
-	
-
-
 	
 	
 	public static Point[][] gridAfterMove(Point[][] grid, movePair move, int newOwner) {
@@ -345,8 +340,14 @@ public class GameState {
 		
 		return possible;
 	}
-	public static movePair getAnyMove(Point[][] grid,Pair pr){
+	public static movePair getAnyMove(Point[][] grid,Pair pr, int opponent_id){
 		movePair movepr=new movePair();
+		List<movePair>rtn = new ArrayList<movePair>();				
+		List<movePair>p1 = new ArrayList<movePair>();
+		List<movePair>p2 = new ArrayList<movePair>();
+		List<movePair>p3 = new ArrayList<movePair>();
+		List<movePair>p4 = new ArrayList<movePair>();
+		
 		for (int i = 0; i < size; i++) {
 			for (int j = 0; j < size; j++) {
 				for (int i_pr=0; i_pr<size; i_pr++) {
@@ -356,14 +357,30 @@ public class GameState {
 					movepr.target = grid[i_pr][j_pr];
 					if (MovePackage.validateMove(movepr, pr)) {
 						movepr.move = true;
-						return movepr;
+						if(movepr.src.owner == opponent_id && movepr.target.owner == opponent_id)
+							p1.add(movepr);
+						else if(movepr.src.owner != movepr.target.owner && movepr.src.value !=1)
+							p2.add(movepr);
+						else if(movepr.src.owner != movepr.target.owner)
+							p3.add(movepr);
+						else p4.add(movepr);
+						//return movepr;
 					}
 				}
 				}
 			
 			}
 		}
-		return movepr;
+		//return movepr;
+		if(p1.size()>0)
+			return p1.get(0);
+		else if(p2.size()>0)
+			return p2.get(0);
+		else if(p3.size()>0)
+			return p3.get(0);
+		else if(p4.size()>0)
+			return p4.get(0);
+		else return movepr;
 		
 	}
 

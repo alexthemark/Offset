@@ -77,7 +77,7 @@ public class Player extends offset.sim.Player {
 			rtn=bestMoves.get(0);
 		
 		if(rtn==null){
-			rtn=GameState.getAnyMove(get2DGrid(grid), pr);
+			rtn=GameState.getAnyMove(get2DGrid(grid), pr, opponent_id);
 		}
 		
 		
