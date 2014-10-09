@@ -99,6 +99,8 @@ public class GameState {
 	}
 	
 	
+	
+	
 	public movePair lowerOpponentMoves(Pair pr, Pair pr0) {
 		movePair next=new movePair();
 		if(!possibleMoves(grid, pr).isEmpty()){
@@ -123,7 +125,7 @@ public class GameState {
 			
 		};
 		
-		PriorityQueue<movePair>maxHeap=new PriorityQueue<>(7,mPairComparator);
+		PriorityQueue<movePair>maxHeap=new PriorityQueue<>(14,mPairComparator);
 			
 		int leastOpponentMove = Integer.MAX_VALUE;
 		for (movePair mp : possibleMoves(grid, pr)) {
@@ -146,15 +148,15 @@ public class GameState {
 				
 			}
 		}
-		/*
+		
 		while(!maxHeap.isEmpty()){
 			movePair temp=maxHeap.poll();
-			if(!isStealable(grid, temp.target, pr0)){
+			if(isStealable(grid, temp.target, pr0)&&temp.src.value>next.src.value){
 				return maxHeap.poll();
 			}
 			
 		}
-		*/
+		
 		return next;
 	}
 	
@@ -362,6 +364,86 @@ public class GameState {
 			}
 		}
 		return movepr;
+		
+	}
+
+	// return best 10 moves maximize my player and minimize opponent
+	public ArrayList<movePair> getMinMaxMoves(Pair pr, Pair pr0) {
+		// TODO Auto-generated method stub
+		ArrayList<movePair>bestMoves=new ArrayList();
+		//my possible moves
+		ArrayList<movePair>possibleMoves=possibleMoves(grid, pr);
+		//lowering opponent moves
+		PriorityQueue<MovePair>minimizingOpponentMoves=opponentMinimizingMoves(grid,pr0,possibleMoves);
+		//max Player move
+		PriorityQueue<MovePair>maxPlayerMove=maxMyMove(grid,pr,minimizingOpponentMoves);
+		while(!maxPlayerMove.isEmpty()){
+			bestMoves.add(maxPlayerMove.poll().getMovePair());
+		}
+		return bestMoves;
+	}
+
+	private PriorityQueue<MovePair> maxMyMove(Point[][] grid2, Pair pr,
+			PriorityQueue<MovePair> minimizingOpponentMoves) {
+		// TODO Auto-generated method stub
+		movePair next=new movePair();
+		
+		
+		Comparator<MovePair>movePairComparator=new Comparator<MovePair>(){
+			public int compare(MovePair p1, MovePair p2){
+						return p2.getNumMoves()-p1.getNumMoves();
+			}
+		};
+		//30 best minimizing moves
+		PriorityQueue<MovePair>maxMovesHeap=new PriorityQueue<>(10, movePairComparator);
+			
+		int playerMaxMoves = Integer.MIN_VALUE;
+		while(!minimizingOpponentMoves.isEmpty()){
+		//for (movePair mp : possibleMoves) {
+			movePair mp=minimizingOpponentMoves.poll().getMovePair();
+			Point[][] newGrid = gridAfterMove(grid, mp, this.playerId);
+			int numMoves=possibleMoves(grid, pr).size();
+			if (numMoves > playerMaxMoves){
+				playerMaxMoves = numMoves;
+				next = mp;
+				next.move = true;
+				maxMovesHeap.add(new MovePair(next,playerMaxMoves));
+			} 
+		}
+		
+		
+		return maxMovesHeap;
+		
+	}
+
+	public  PriorityQueue<MovePair> opponentMinimizingMoves(Point[][] grid2,
+			Pair pr0, ArrayList<movePair> possibleMoves) {
+		
+		movePair next=new movePair();
+		
+		
+		Comparator<MovePair>movePairComparator=new Comparator<MovePair>(){
+			public int compare(MovePair p1, MovePair p2){
+						return p1.getNumMoves()-p2.getNumMoves();
+			}
+		};
+		//30 best minimizing moves
+		PriorityQueue<MovePair>minimizingMovesHeap=new PriorityQueue<>(30, movePairComparator);
+			
+		int leastOpponentMove = Integer.MAX_VALUE;
+		for (movePair mp : possibleMoves) {
+			Point[][] newGrid = gridAfterMove(grid, mp, this.playerId);
+			int numOpponentMoves=opponentPossibleMoves(newGrid, pr0);
+			if (numOpponentMoves < leastOpponentMove||numOpponentMoves==0){
+				leastOpponentMove = numOpponentMoves;
+				next = mp;
+				next.move = true;
+				minimizingMovesHeap.add(new MovePair(next,numOpponentMoves));
+			} 
+		}
+		
+		
+		return minimizingMovesHeap;
 		
 	}
 

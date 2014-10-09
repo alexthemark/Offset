@@ -64,11 +64,17 @@ public class Player extends offset.sim.Player {
 		
 		movePair rtn=null;
 		rtn=startState.lowerOpponentMoves(pr, pr0);
-		
-		if(GameState.opponentPossibleMoves(get2DGrid(grid), pr0)<10){
+		/*
+		if(GameState.opponentPossibleMoves(get2DGrid(grid), pr0)<1){
 			rtn=makeDecision(startState, pr, pr0);
 			return rtn;
 		}
+		*/
+		
+		ArrayList<movePair> bestMoves=startState.getMinMaxMoves(pr,pr0);
+		
+		if(bestMoves.size()>0)
+			rtn=bestMoves.get(0);
 		
 		if(rtn==null){
 			rtn=GameState.getAnyMove(get2DGrid(grid), pr);
