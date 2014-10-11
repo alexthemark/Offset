@@ -9,9 +9,7 @@ import offset.sim.movePair;
 
 public class Player extends offset.sim.Player {
 	static int size = 32;
-	static int MAX_DEPTH = 1;
 	static int opponent_id;
-	static int MAX_MOVES_TO_CHECK = 10;
 	Pair opponentPr;
 	boolean initiated = false;
 	int expandedNodes = 0;
@@ -41,11 +39,7 @@ public class Player extends offset.sim.Player {
 		if (!initiated) {
 			init();
 		}
-		movePair lastMove = null;
-		if (history.size() > 0) {
-			lastMove = (movePair) history.get(history.size() - 1).get(1);
-		}
-		GameState startState = new GameState(grid, pr, pr0, id, opponent_id, lastMove);		
+		GameState startState = new GameState(grid, pr, pr0, id, opponent_id);		
 		movePair rtn=null;
 		
 		ArrayList<movePair> bestMoves=startState.getMinMaxMoves(pr,pr0);
@@ -65,75 +59,5 @@ public class Player extends offset.sim.Player {
 		long endTime = System.currentTimeMillis();
 		System.out.println("Completed the move in " + (endTime - startTime) + " milliseconds");
 		return rtn;
-	}
-	
-	public movePair makeDecision(GameState startState, Pair pr, Pair pr0) {
-		opponentPr = pr0;
-        movePair result = null;
-        int resultValue = Integer.MIN_VALUE;
-        List<movePair> moves = startState.getMinMaxMoves(pr, pr0);
-        int moveNo = 0;
-        for (movePair move : moves) {
-        	moveNo++;
-        	if (moveNo > MAX_MOVES_TO_CHECK)
-        		break;
-        	GameState newState = new GameState(startState);
-        	newState.makeMove(move, id);
-            int value = minValue(newState, Integer.MIN_VALUE, Integer.MAX_VALUE, 0);
-            if (value > resultValue) {
-                    result = move;
-                    resultValue = value;
-            }
-        }
-        if (result == null) {
-        	result = new movePair(false, new Point(0,0,0,0), new Point(0,0,0,0));
-        }
-        return result;
-	}
-	
-	public int maxValue(GameState startState, double alpha, double beta, int depth) {
-		expandedNodes++;
-        if (depth == MAX_DEPTH)
-            return startState.playerMoves.getNumberOfRemainingMoves();;
-        int value = Integer.MIN_VALUE;
-        List<movePair> moves = startState.getMinMaxMoves(pr, opponentPr);
-        if (moves.isEmpty())
-        	return startState.playerScore;
-        int moveNo = 0;
-        for (movePair move : moves) {
-        	moveNo++;
-        	if (moveNo > MAX_MOVES_TO_CHECK)
-        		break;
-        	GameState newState = new GameState(startState);
-        	newState.makeMove(move, id);
-            value = Math.max(value, minValue(newState, alpha, beta, depth + 1));
-            if (value >= beta)
-                    return value;
-            alpha = Math.max(alpha, value);
-        }
-        return value;
-	}
-
-	public int minValue(GameState startState, double alpha, double beta, int depth) {
-		expandedNodes++;
-		if (depth == MAX_DEPTH)
-			return startState.opponentMoves.getNumberOfRemainingMoves();
-        int value = Integer.MAX_VALUE;
-        List<movePair> moves = startState.getMinMaxMoves(opponentPr, pr);
-        if (moves.isEmpty())
-        	return startState.opponentScore;
-        int moveNo = 0;
-        for (movePair move : moves) {
-        	moveNo++;
-        	if (moveNo > MAX_MOVES_TO_CHECK)
-        		break;
-        	GameState newState = new GameState(startState);
-        	newState.makeMove(move, id);
-            value = Math.min(value, maxValue(newState, alpha, beta, depth + 1));
-            if (value <= alpha)
-                    return value;
-            beta = Math.min(beta, value);
-        }
-        return value;
 	}
 }
