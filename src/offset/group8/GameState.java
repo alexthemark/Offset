@@ -91,172 +91,6 @@ public class GameState {
     	return score;
     }
 	
-	public List<movePair> getAvailableMoves(int id) {
-		if (id == playerId)
-			return playerMoves.getPossibleMovesByPriority(Player.MAX_MOVES_TO_CHECK, lastPoint);
-		else
-			return opponentMoves.getPossibleMovesByPriority(Player.MAX_MOVES_TO_CHECK, lastPoint);
-	}
-	
-	
-	
-	
-	public movePair lowerOpponentMoves(Pair pr, Pair pr0) {
-		movePair next=new movePair();
-		if(!possibleMoves(grid, pr).isEmpty()){
-		 next= possibleMoves(grid, pr).get(0);
-		}else{
-			next=getAnyMove(grid, pr, playerId);
-		}
-		next.move = false;
-		
-		Comparator<movePair>mPairComparator=new Comparator<movePair>(){
-			public int compare(movePair p1, movePair p2){
-					if(p1.src.value<p2.src.value){
-						return 1;
-					}else if(p1.src.value==p2.src.value){
-						return 0;
-					}else{
-						return -1;
-					}
-				
-			}
-			
-			
-		};
-		
-		PriorityQueue<movePair>maxHeap=new PriorityQueue<>(14,mPairComparator);
-			
-		int leastOpponentMove = Integer.MAX_VALUE;
-		for (movePair mp : possibleMoves(grid, pr)) {
-			Point[][] newGrid = gridAfterMove(grid, mp, this.playerId);
-			int t=opponentPossibleMoves(newGrid, pr0);
-			if (t < leastOpponentMove&&t!=0){
-				leastOpponentMove = t;
-				maxHeap.add(mp);
-				next = mp;
-				next.move = true;
-			} else if(t==0){
-				if((mp.src.owner!=playerId || mp.target.owner!=playerId)){
-					
-					if((next.src.owner!=playerId || next.target.owner!=playerId)&&next.src.value>mp.src.value){
-						continue;
-					}else{
-						next=mp;
-					}		
-				}
-				
-			}
-		}
-		
-		while(!maxHeap.isEmpty()){
-			movePair temp=maxHeap.poll();
-			if(isStealable(grid, temp.target, pr0)&&temp.src.value>next.src.value){
-				return maxHeap.poll();
-			}
-			
-		}
-		
-		return next;
-	}
-	
-	public boolean isStealable(Point [][] grid, Point spot, Pair pr0) {
-		for(Pair direction : MovePackage.moveForPair(pr0)) {
-			if (MovePackage.isValidBoardIndex(spot.x + direction.p, spot.y + direction.q)) {
-				Point possibleMatch = pointAtIndex(grid, spot.x + direction.p, spot.y + direction.q);
-				if (spot.value * 2 == possibleMatch.value) {
-					return true;
-				}
-			}
-		}
-
-		return false;
-	}
-
-	public movePair maximizeMyMoves(Pair pr) {
-		movePair next=new movePair();
-			
-		int myMaxMove = Integer.MIN_VALUE;
-		
-		for (movePair mp : possibleMoves(grid, pr)) {
-			Point[][] newGrid = gridAfterMove(grid, mp, this.playerId);
-			int t=opponentPossibleMoves(newGrid, pr); // my moves
-			if (t > myMaxMove){
-				myMaxMove = t;
-				next = mp;
-				next.move = true;
-			} 
-		}
-		return next;
-	}
-	
-		
-	public List<movePair> getAvailableMoves(Pair pr, int playerId) {
-		int opponentId = 0;
-		if (playerId == 0)
-			opponentId = 1;
-		List<movePair>rtn = new ArrayList<movePair>();				
-		List<movePair>p1 = new ArrayList<movePair>();
-		List<movePair>p2 = new ArrayList<movePair>();
-		List<movePair>p3 = new ArrayList<movePair>();
-		List<movePair>p4 = new ArrayList<movePair>();		
-		for (int i = 0; i < size; i++) {
-			for (int j = 0; j < size; j++) {
-				for (int i_pr=0; i_pr<size; i_pr++) {
-					for (int j_pr=0; j_pr <size; j_pr++) {
-						movePair movepr = new movePair();
-						movepr.move = false;
-						movepr.src = grid[i][j];
-						movepr.target = grid[i_pr][j_pr];
-						if (MovePackage.validateMove(movepr, pr)) {
-							movepr.move = true;						
-							if(movepr.src.owner == opponentId && movepr.target.owner == opponentId)
-								p1.add(movepr);
-							else if(movepr.src.owner != movepr.target.owner && movepr.src.value !=1)
-								p2.add(movepr);
-							else if(movepr.src.owner != movepr.target.owner)
-								p3.add(movepr);
-							else p4.add(movepr);		
-						}
-					}
-				}
-			}
-		}
-		
-		//Create the rtn list in decreasing order of priority
-		if(p1.size()>0)
-			rtn.addAll(p1);
-		if(p2.size()>0)
-			rtn.addAll(p2);
-		if(p3.size()>0)
-			rtn.addAll(p3);
-		if(p4.size()>0)
-			rtn.addAll(p4);
-		return rtn;
-	}
-	
-	
-	public movePair lowerOpponentMoves(Point[][] grid, Pair pr, Pair pr0) {
-		movePair next = new movePair();
-		next.move = false;
-		
-		int leastOpponentMove = Integer.MAX_VALUE;
-		
-		//for (movePair mp : getAvailableMoves(pr, this.playerId)) {
-		for (movePair mp : possibleMoves(grid, pr)) {
-			Point[][] newGrid = gridAfterMove(grid, mp, this.playerId);
-			int t=opponentPossibleMoves(newGrid, pr0);
-			
-			
-			if (t < leastOpponentMove){
-				leastOpponentMove = t;
-				next = mp;
-				next.move = true;
-			}
-		}
-		return next;
-	}
-	
 	public static int opponentPossibleMoves(Point[][] grid, Pair pr) {
 		int availableMoves=0;
 		for (int i = 0; i < size; i++) {
@@ -313,7 +147,6 @@ public class GameState {
 	}
 
 	public static Point pointAtIndex(Point[][] grid, int i, int j) {
-		//return grid[i*size + j];
 		return grid[i][j];
 	}
 	
@@ -340,54 +173,11 @@ public class GameState {
 		
 		return possible;
 	}
-	public static movePair getAnyMove(Point[][] grid,Pair pr, int opponent_id){
-		movePair movepr=new movePair();
-		List<movePair>rtn = new ArrayList<movePair>();				
-		List<movePair>p1 = new ArrayList<movePair>();
-		List<movePair>p2 = new ArrayList<movePair>();
-		List<movePair>p3 = new ArrayList<movePair>();
-		List<movePair>p4 = new ArrayList<movePair>();
-		
-		for (int i = 0; i < size; i++) {
-			for (int j = 0; j < size; j++) {
-				for (int i_pr=0; i_pr<size; i_pr++) {
-				for (int j_pr=0; j_pr <size; j_pr++) {
-					movepr.move = false;
-					movepr.src = grid[i][j];
-					movepr.target = grid[i_pr][j_pr];
-					if (MovePackage.validateMove(movepr, pr)) {
-						movepr.move = true;
-						if(movepr.src.owner == opponent_id && movepr.target.owner == opponent_id)
-							p1.add(movepr);
-						else if(movepr.src.owner != movepr.target.owner && movepr.src.value !=1)
-							p2.add(movepr);
-						else if(movepr.src.owner != movepr.target.owner)
-							p3.add(movepr);
-						else p4.add(movepr);
-						//return movepr;
-					}
-				}
-				}
-			
-			}
-		}
-		//return movepr;
-		if(p1.size()>0)
-			return p1.get(0);
-		else if(p2.size()>0)
-			return p2.get(0);
-		else if(p3.size()>0)
-			return p3.get(0);
-		else if(p4.size()>0)
-			return p4.get(0);
-		else return movepr;
-		
-	}
 
 	// return best 10 moves maximize my player and minimize opponent
 	public ArrayList<movePair> getMinMaxMoves(Pair pr, Pair pr0) {
 		// TODO Auto-generated method stub
-		ArrayList<movePair>bestMoves=new ArrayList();
+		ArrayList<movePair>bestMoves=new ArrayList<movePair>();
 		//my possible moves
 		ArrayList<movePair>possibleMoves=possibleMoves(grid, pr);
 		//lowering opponent moves
@@ -419,7 +209,7 @@ public class GameState {
 		//for (movePair mp : possibleMoves) {
 			movePair mp=minimizingOpponentMoves.poll().getMovePair();
 			Point[][] newGrid = gridAfterMove(grid, mp, this.playerId);
-			int numMoves=possibleMoves(grid, pr).size();
+			int numMoves=possibleMoves(newGrid, pr).size();
 			if (numMoves > playerMaxMoves){
 				playerMaxMoves = numMoves;
 				next = mp;
@@ -433,11 +223,10 @@ public class GameState {
 		
 	}
 
-	public  PriorityQueue<MovePair> opponentMinimizingMoves(Point[][] grid2,
+	private PriorityQueue<MovePair> opponentMinimizingMoves(Point[][] grid2,
 			Pair pr0, ArrayList<movePair> possibleMoves) {
 		
 		movePair next=new movePair();
-		
 		
 		Comparator<MovePair>movePairComparator=new Comparator<MovePair>(){
 			public int compare(MovePair p1, MovePair p2){
@@ -458,11 +247,6 @@ public class GameState {
 				minimizingMovesHeap.add(new MovePair(next,numOpponentMoves));
 			} 
 		}
-		
-		
 		return minimizingMovesHeap;
-		
 	}
-
-	
 }

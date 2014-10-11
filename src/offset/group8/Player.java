@@ -37,6 +37,7 @@ public class Player extends offset.sim.Player {
 	}
 	
 	public movePair move(Point[] grid, Pair pr, Pair pr0, ArrayList<ArrayList> history) {
+		long startTime = System.currentTimeMillis();
 		if (!initiated) {
 			init();
 		}
@@ -44,44 +45,25 @@ public class Player extends offset.sim.Player {
 		if (history.size() > 0) {
 			lastMove = (movePair) history.get(history.size() - 1).get(1);
 		}
-		GameState startState = new GameState(grid, pr, pr0, id, opponent_id, lastMove);
-		/*movePair rtn=null;
-		
-		// when it reaches 125 ticks, each tick adds two input to the history
-		if(history.size()<250){
-			rtn=startState.lowerOpponentMoves(pr, pr0);
-		}else{
-			rtn = makeDecision(startState, pr, pr0);
-		}
-		
-		//sometimes makeDecision returns null, it has a bug that's why this added
-		if(rtn==null){
-			rtn=startState.lowerOpponentMoves(pr, pr0);
-		}
-		System.out.println(expandedNodes);
-		*/
-		
-		
+		GameState startState = new GameState(grid, pr, pr0, id, opponent_id, lastMove);		
 		movePair rtn=null;
-		rtn=startState.lowerOpponentMoves(pr, pr0);
-		/*
-		if(GameState.opponentPossibleMoves(get2DGrid(grid), pr0)<1){
-			rtn=makeDecision(startState, pr, pr0);
-			return rtn;
-		}
-		*/
 		
 		ArrayList<movePair> bestMoves=startState.getMinMaxMoves(pr,pr0);
 		
-		if(bestMoves.size()>0)
+		if(bestMoves.size()>0) {
 			rtn=bestMoves.get(0);
+		}
+			
 		
 		if(rtn==null){
-			rtn=GameState.getAnyMove(get2DGrid(grid), pr, opponent_id);
+			System.out.println("No moves left");
+			rtn = new movePair();
+			rtn.move = false;
 		}
 		
 		
-		System.out.println(expandedNodes);
+		long endTime = System.currentTimeMillis();
+		System.out.println("Completed the move in " + (endTime - startTime) + " milliseconds");
 		return rtn;
 	}
 	
@@ -89,7 +71,7 @@ public class Player extends offset.sim.Player {
 		opponentPr = pr0;
         movePair result = null;
         int resultValue = Integer.MIN_VALUE;
-        List<movePair> moves = startState.getAvailableMoves(id);
+        List<movePair> moves = startState.getMinMaxMoves(pr, pr0);
         int moveNo = 0;
         for (movePair move : moves) {
         	moveNo++;
@@ -114,7 +96,7 @@ public class Player extends offset.sim.Player {
         if (depth == MAX_DEPTH)
             return startState.playerMoves.getNumberOfRemainingMoves();;
         int value = Integer.MIN_VALUE;
-        List<movePair> moves = startState.getAvailableMoves(id);
+        List<movePair> moves = startState.getMinMaxMoves(pr, opponentPr);
         if (moves.isEmpty())
         	return startState.playerScore;
         int moveNo = 0;
@@ -137,7 +119,7 @@ public class Player extends offset.sim.Player {
 		if (depth == MAX_DEPTH)
 			return startState.opponentMoves.getNumberOfRemainingMoves();
         int value = Integer.MAX_VALUE;
-        List<movePair> moves = startState.getAvailableMoves(id);
+        List<movePair> moves = startState.getMinMaxMoves(opponentPr, pr);
         if (moves.isEmpty())
         	return startState.opponentScore;
         int moveNo = 0;
