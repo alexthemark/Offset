@@ -1,8 +1,7 @@
 package offset.group8;
 
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.PriorityQueue;
+import java.util.List;
 
 import offset.sim.Pair;
 import offset.sim.Point;
@@ -40,75 +39,42 @@ public class GameState {
 		this.opponentPair = oldGame.opponentPair;
 	}
 
-	// return best 10 moves maximize my player and minimize opponent
-	public ArrayList<movePair> getMinMaxMoves(Pair pr, Pair pr0) {
-		// TODO Auto-generated method stub
-		ArrayList<movePair>bestMoves=new ArrayList<movePair>();
+	// return the best moves to maximize my player and minimize opponent's possible moves
+	public List<movePair> getMinMaxMoves(Pair pr, Pair pr0) {
 		//my possible moves
 		ArrayList<movePair>possibleMoves=possibleMoves(grid, pr);
 		//lowering opponent moves
-		PriorityQueue<MovePair>minimizingOpponentMoves=opponentMinimizingMoves(grid,pr0,possibleMoves);
-		//max Player move
-		PriorityQueue<MovePair>maxPlayerMove=maxMyMove(grid,pr,minimizingOpponentMoves);
-		while(!maxPlayerMove.isEmpty()){
-			bestMoves.add(maxPlayerMove.poll().getMovePair());
-		}
+		List<movePair> bestMoves = opponentMinimizingMoves(possibleMoves);
 		return bestMoves;
 	}
-
-	private PriorityQueue<MovePair> maxMyMove(Point[][] grid2, Pair pr,
-			PriorityQueue<MovePair> minimizingOpponentMoves) {
-		movePair next=new movePair();
-		
-		Comparator<MovePair>movePairComparator=new Comparator<MovePair>(){
-			public int compare(MovePair p1, MovePair p2){
-						return p2.getNumMoves()-p1.getNumMoves();
-			}
-		};
-		PriorityQueue<MovePair>maxMovesHeap=new PriorityQueue<>(10, movePairComparator);
-			
-		int playerMaxMoves = Integer.MIN_VALUE;
-		while(!minimizingOpponentMoves.isEmpty()){
-			movePair mp=minimizingOpponentMoves.poll().getMovePair();
-			Point[][] newGrid = gridAfterMove(grid, mp, this.playerId);
-			int numMoves=possibleMoves(newGrid, pr).size();
-			if (numMoves > playerMaxMoves){
-				playerMaxMoves = numMoves;
-				next = mp;
-				next.move = true;
-				maxMovesHeap.add(new MovePair(next,playerMaxMoves));
-			} 
-		}
-		
-		return maxMovesHeap;
-		
-	}
-
-	private PriorityQueue<MovePair> opponentMinimizingMoves(Point[][] grid2,
-			Pair pr0, ArrayList<movePair> possibleMoves) {
-		
-		movePair next=new movePair();
-		
-		Comparator<MovePair>movePairComparator=new Comparator<MovePair>(){
-			public int compare(MovePair p1, MovePair p2){
-						return p1.getNumMoves()-p2.getNumMoves();
-			}
-		};
-		//30 best minimizing moves
-		PriorityQueue<MovePair>minimizingMovesHeap=new PriorityQueue<>(30, movePairComparator);
-			
-		int leastOpponentMove = Integer.MAX_VALUE;
+	
+	private List<movePair> opponentMinimizingMoves(ArrayList<movePair> possibleMoves) {
+		List<movePair> returnList = new ArrayList<movePair>();
+		int bestOpponentDelta = Integer.MIN_VALUE;
+		int bestPlayerDelta = Integer.MAX_VALUE;
+		int startingPossibleMoves = possibleMoves.size();
+		int opponentStartingPossibleMoves = possibleMoves(grid, opponentPair).size();
 		for (movePair mp : possibleMoves) {
 			Point[][] newGrid = gridAfterMove(grid, mp, this.playerId);
-			int numOpponentMoves=possibleMoves(newGrid, pr0).size();
-			if (numOpponentMoves < leastOpponentMove||numOpponentMoves==0){
-				leastOpponentMove = numOpponentMoves;
-				next = mp;
-				next.move = true;
-				minimizingMovesHeap.add(new MovePair(next,numOpponentMoves));
-			} 
+			int opponentMovesLeft = numPossibleMoves(newGrid, opponentPair);
+			int playerMovesLeft = numPossibleMoves(newGrid, playerPair);
+			int opponentDelta= opponentStartingPossibleMoves - opponentMovesLeft;
+			int playerDelta = startingPossibleMoves - playerMovesLeft;
+			if (opponentDelta > bestOpponentDelta || (opponentDelta == bestOpponentDelta && playerDelta < bestPlayerDelta)) {
+				bestOpponentDelta = opponentDelta;
+				bestPlayerDelta = playerDelta;
+				mp.move = true;
+				returnList.clear();
+				returnList.add(mp);
+				System.out.println("Opponent possible moves left: " + opponentMovesLeft);
+				System.out.println("My possible moves left: " + playerMovesLeft);
+			}
+			else if (opponentDelta == bestOpponentDelta && playerDelta == bestPlayerDelta) {
+				mp.move = true;
+				returnList.add(mp);
+			}
 		}
-		return minimizingMovesHeap;
+		return returnList;
 	}
 	
 	private static boolean isValidBoardIndex(int i, int j) {
@@ -176,5 +142,26 @@ public class GameState {
 			}
 		}
 		return possible;
+	}
+	
+	private static int numPossibleMoves(Point[][] grid, Pair pr) {
+		int counter = 0;
+		for (int i = 0; i < size; i++) {
+			for (int j = 0; j < size; j++) {
+				Point currentPoint = pointAtIndex(grid, i, j);
+				if (currentPoint.value == 0) {
+					continue;
+				}
+				for (Pair d : moveForPair(pr)) {
+					if (isValidBoardIndex(i + d.p, j + d.q)){
+						Point possiblePairing = pointAtIndex(grid, i + d.p, j + d.q);
+						if (currentPoint.value == possiblePairing.value) {
+							counter+=2;
+						}
+					}
+				}
+			}
+		}
+		return counter;
 	}
 }
