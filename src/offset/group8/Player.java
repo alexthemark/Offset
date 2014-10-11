@@ -40,21 +40,13 @@ public class Player extends offset.sim.Player {
 			init();
 		}
 		GameState startState = new GameState(grid, pr, pr0, id, opponent_id);		
-		movePair rtn=null;
-		
-		List<movePair> bestMoves=startState.getMinMaxMoves(pr,pr0);
-		
-		if(bestMoves.size()>0) {
-			rtn=bestMoves.get(0);
-		}
-			
+		movePair rtn = startState.opponentMinimizingMoves();	
 		
 		if(rtn==null){
 			System.out.println("No moves left");
 			rtn = new movePair();
 			rtn.move = false;
 		}
-		
 		
 		long endTime = System.currentTimeMillis();
 		System.out.println("Completed the move in " + (endTime - startTime) + " milliseconds");
