@@ -58,21 +58,17 @@ public class GameState {
 
 	private PriorityQueue<MovePair> maxMyMove(Point[][] grid2, Pair pr,
 			PriorityQueue<MovePair> minimizingOpponentMoves) {
-		// TODO Auto-generated method stub
 		movePair next=new movePair();
-		
 		
 		Comparator<MovePair>movePairComparator=new Comparator<MovePair>(){
 			public int compare(MovePair p1, MovePair p2){
 						return p2.getNumMoves()-p1.getNumMoves();
 			}
 		};
-		//30 best minimizing moves
 		PriorityQueue<MovePair>maxMovesHeap=new PriorityQueue<>(10, movePairComparator);
 			
 		int playerMaxMoves = Integer.MIN_VALUE;
 		while(!minimizingOpponentMoves.isEmpty()){
-		//for (movePair mp : possibleMoves) {
 			movePair mp=minimizingOpponentMoves.poll().getMovePair();
 			Point[][] newGrid = gridAfterMove(grid, mp, this.playerId);
 			int numMoves=possibleMoves(newGrid, pr).size();
@@ -83,7 +79,6 @@ public class GameState {
 				maxMovesHeap.add(new MovePair(next,playerMaxMoves));
 			} 
 		}
-		
 		
 		return maxMovesHeap;
 		
