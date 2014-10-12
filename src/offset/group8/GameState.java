@@ -28,17 +28,6 @@ public class GameState {
 		this.opponentId = opponentId;
 	}
 	
-	public GameState(GameState oldGame) {
-		grid = new Point[size][size];
-		for (int i = 0; i < size; i++) {
-			for (int j = 0; j < size; j++) {
-				grid[i][j] = new Point(oldGame.grid[i][j]);
-			}
-		}
-		this.playerPair = oldGame.playerPair;
-		this.opponentPair = oldGame.opponentPair;
-	}
-	
 	public movePair opponentMinimizingMoves() {
 		movePair rtn = null;
 		Set<movePair>playerMoves=possibleMoves(grid, playerPair);
@@ -73,12 +62,17 @@ public class GameState {
 	
 	private static int pointsGained(movePair mp, int player) {
 		int counter = 0;
-		Point[] points = {mp.src, mp.target};
+		/*Point[] points = {mp.src, mp.target};
 		for (Point point : points) {
 			if (point.owner != player) {
 				counter += point.value;
 			}
 		}
+		*/
+		if(mp.src.owner != player)
+			counter += mp.src.value;
+		if(mp.target.owner != player)
+			counter += mp.target.value;
 		return counter;
 	}
 	
