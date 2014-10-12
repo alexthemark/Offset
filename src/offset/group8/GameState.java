@@ -394,15 +394,6 @@ public class GameState {
 		PriorityQueue<MovePair>minimizingOpponentMoves=opponentMinimizingMoves(grid,pr0,possibleMoves);
 		//max Player move
 		PriorityQueue<MovePair>maxPlayerMove=maxMyMove(grid,pr,minimizingOpponentMoves);
-		boolean assertion = true;
-		assertion = assertion || maxPlayerMove.peek().equals(minimizingOpponentMoves.peek());
-		assertion = assertion || maxPlayerMove.size() == 1;
-		if (assertion) {
-			System.out.println("It only contains that one element");
-		}
-		else {
-			System.out.println("It contains more than that element");
-		}
 		while(!maxPlayerMove.isEmpty()){
 			bestMoves.add(maxPlayerMove.poll().getMovePair());
 		}
@@ -428,7 +419,7 @@ public class GameState {
 		//for (movePair mp : possibleMoves) {
 			movePair mp=minimizingOpponentMoves.poll().getMovePair();
 			Point[][] newGrid = gridAfterMove(grid, mp, this.playerId);
-			int numMoves=possibleMoves(grid, pr).size();
+			int numMoves=possibleMoves(newGrid, pr).size();
 			if (numMoves > playerMaxMoves){
 				playerMaxMoves = numMoves;
 				next = mp;
