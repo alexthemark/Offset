@@ -1,6 +1,8 @@
 package offset.group8;
 
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import offset.sim.Pair;
@@ -14,6 +16,8 @@ public class GameState {
 	public Pair opponentPair;
 	public int playerId;
 	public int opponentId;
+	public int playerDeltaScore;
+	public int opponentDeltaScore;
 	
 	public static int size = 32;
 	
@@ -28,15 +32,46 @@ public class GameState {
 		this.opponentId = opponentId;
 	}
 	
-	public movePair opponentMinimizingMoves() {
-		movePair rtn = null;
+	public GameState(GameState oldGame) {
+		grid = new Point[size][size];
+		for (int i = 0; i < size; i++) {
+			for (int j = 0; j < size; j++) {
+				grid[i][j] = new Point(oldGame.grid[i][j]);
+			}
+		}
+		this.playerPair = oldGame.playerPair;
+		this.opponentPair = oldGame.opponentPair;
+		this.playerId = oldGame.playerId;
+		this.opponentId = oldGame.playerId;
+		this.playerDeltaScore = oldGame.playerDeltaScore;
+		this.opponentDeltaScore = oldGame.opponentDeltaScore;
+	}
+	
+	public void makeMove(movePair movepr, int playerId) {
+		Point target = movepr.target;
+		Point src = movepr.src;
+		if (src.owner != playerId && target.owner != playerId) {
+			playerDeltaScore += src.value * 2;
+			opponentDeltaScore -= src.value * 2;
+		}
+		else if (src.owner != playerId || target.owner != playerId) {
+			playerDeltaScore += src.value;
+			opponentDeltaScore -= src.value;
+		}
+		grid[target.x][target.y].value = grid[target.x][target.y].value + grid[src.x][src.y].value;
+		grid[src.x][src.y].value = 0; 
+		grid[target.x][target.y].owner = playerId;
+		grid[src.x][src.y].owner = -1;
+	}
+	
+	public List<movePair> opponentMinimizingMoves() {
+		List<movePair> returnList = new LinkedList<movePair>();
 		Set<movePair>playerMoves=possibleMoves(grid, playerPair);
 		Set<movePair>opponentMoves = possibleMoves(grid, opponentPair);
 		int bestOpponentDelta = Integer.MIN_VALUE;
 		int bestPlayerDelta = Integer.MAX_VALUE;
 		int startingPossibleMoves = playerMoves.size();
 		int opponentStartingPossibleMoves = opponentMoves.size();
-		int bestPointsGained = 0;
 		for (movePair mp : playerMoves) {
 			Point[][] newGrid = gridAfterMove(grid, mp, this.playerId);
 			int opponentMovesLeft = numPossibleMoves(newGrid, opponentPair);
@@ -47,33 +82,17 @@ public class GameState {
 			if (opponentDelta > bestOpponentDelta || (opponentDelta == bestOpponentDelta && playerDelta < bestPlayerDelta)) {
 				bestOpponentDelta = opponentDelta;
 				bestPlayerDelta = playerDelta;
-				bestPointsGained = pointsGained(mp, playerId);
 				mp.move = true;
-				rtn = mp;
+				returnList.clear();
+				returnList.add(0, mp);
 			}
 			// if we can gain points while minimizing, might as well do that. 
-			else if (opponentDelta == bestOpponentDelta && playerDelta == bestPlayerDelta && pointsGained(mp, playerId) >= bestPointsGained) {
+			else if (opponentDelta == bestOpponentDelta && playerDelta == bestPlayerDelta) {
 				mp.move = true;
-				rtn = mp;
+				returnList.add(0, mp);
 			}
 		}
-		return rtn;
-	}
-	
-	private static int pointsGained(movePair mp, int player) {
-		int counter = 0;
-		/*Point[] points = {mp.src, mp.target};
-		for (Point point : points) {
-			if (point.owner != player) {
-				counter += point.value;
-			}
-		}
-		*/
-		if(mp.src.owner != player)
-			counter += mp.src.value;
-		if(mp.target.owner != player)
-			counter += mp.target.value;
-		return counter;
+		return returnList;
 	}
 	
 	private static boolean isValidBoardIndex(int i, int j) {
@@ -115,6 +134,10 @@ public class GameState {
 		newSrc.owner = -1;
 		
 		return newGrid;
+	}
+	
+	public Set<movePair> possibleMoves(Pair pr) {
+		return possibleMoves(grid, pr);
 	}
 	
 	private static Set<movePair> possibleMoves(Point[][] grid, Pair pr) {
