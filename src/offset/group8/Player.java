@@ -10,6 +10,7 @@ import offset.sim.movePair;
 public class Player extends offset.sim.Player {
 	private static final int MAX_MOVES_TO_CHECK = 10;
 	private static final int MAX_DEPTH = 3;
+	private static final int ALPHA_BETA_CUTOFF_TIME = 75;
 	static int size = 32;
 	static int opponent_id;
 	Pair opponentPr;
@@ -56,7 +57,7 @@ public class Player extends offset.sim.Player {
 		}
 		
 		long endTime = System.currentTimeMillis();
-		if (endTime - startTime < 100) {
+		if (endTime - startTime < ALPHA_BETA_CUTOFF_TIME) {
 			rtn = alphaBeta(startState, pr, pr0, minMaxMoves);
 			System.out.println("Alpha beta-ing");
 		}
