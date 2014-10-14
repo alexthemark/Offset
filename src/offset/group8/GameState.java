@@ -178,17 +178,17 @@ public class GameState {
 	 */
 	private int numMovesDelta(movePair movepr, Pair pr) {
 		// start off assuming that we've lost the maximum number of moves
-		int counter = -64;
+		int counter = -32;
 		//check around the source
 		List<Point> neighbors = neighbors(movepr.src, pr);
 		for (Point p : neighbors) {
-			if (p.value == movepr.src.value && p.value > 0)
+			if (p.value == grid[movepr.src.x][movepr.src.y].value && p.value > 0)
 				counter += 2;
 		}
 		neighbors = neighbors(movepr.target, pr);
 		
 		for (Point p : neighbors) {
-			if (p.value == movepr.target.value && p.value > 0)
+			if (p.value == grid[movepr.target.x][movepr.target.y].value && p.value > 0)
 				counter += 2;
 		}
 		return counter;
