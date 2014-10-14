@@ -1,7 +1,6 @@
 package offset.group8;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -22,7 +21,6 @@ public class GameState {
 	public int opponentDeltaScore;
 	private int numberOfPlayerMovesRemaining;
 	private int numberOfOpponentMovesRemaining;
-	private boolean initi;
 	
 	public static int size = 32;
 	
@@ -35,7 +33,6 @@ public class GameState {
 		this.opponentPair = opponentPair;
 		this.playerId = playerId;
 		this.opponentId = opponentId;
-		this.initi = false;
 	}
 	
 	public GameState(GameState oldGame) {
@@ -134,33 +131,24 @@ public class GameState {
 	}
 	
 	public int numPossibleMoves(Pair pr) {
-		// first see if we've stored it
-		if (initi) {
-			if (pr.equals(playerPair))
-				return numberOfPlayerMovesRemaining;
-			return numberOfOpponentMovesRemaining;
-		}
-		else {
-			int counter = 0;
-			for (int i = 0; i < size; i++) {
-				for (int j = 0; j < size; j++) {
-					Point currentPoint = grid[i][j];
-					if (currentPoint.value == 0) {
-						continue;
-					}
-					for (Pair d : moveForPair(pr)) {
-						if (isValidBoardIndex(i + d.p, j + d.q)){
-							Point possiblePairing = grid[i + d.p][j + d.q];
-							if (currentPoint.value == possiblePairing.value) {
-								counter+=2;
-							}
+		int counter = 0;
+		for (int i = 0; i < size; i++) {
+			for (int j = 0; j < size; j++) {
+				Point currentPoint = grid[i][j];
+				if (currentPoint.value == 0) {
+					continue;
+				}
+				for (Pair d : moveForPair(pr)) {
+					if (isValidBoardIndex(i + d.p, j + d.q)){
+						Point possiblePairing = grid[i + d.p][j + d.q];
+						if (currentPoint.value == possiblePairing.value) {
+							counter+=2;
 						}
 					}
 				}
 			}
-			
-			return counter;
 		}
+		return counter;
 	}
 	
 	/* Method for initial calculation of moves comes directly from group3's in class suggestions */
