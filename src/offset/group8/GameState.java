@@ -158,7 +158,7 @@ public class GameState {
 					}
 				}
 			}
-			
+			initi = true;
 			return counter;
 		}
 	}
