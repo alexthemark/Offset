@@ -28,15 +28,7 @@ public class Player extends offset.sim.Player {
 			opponent_id = 1;
 	}
 
-	
-	public static Point[][] get2DGrid(Point[]grid){
-		Point [][]grid2D = new Point[size][size];
-		for (Point point : grid) {
-			grid2D[point.x][point.y] = point;
-		}
-		return grid2D;
-	}
-	
+
 	public movePair move(Point[] grid, Pair pr, Pair pr0, ArrayList<ArrayList> history) {
 		long startTime = System.currentTimeMillis();
 		if (!initiated) {
